@@ -1,12 +1,16 @@
 package id.sam.omdb2;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -28,6 +32,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import id.sam.omdb2.model.Movie;
 import id.sam.omdb2.model.TitleMovie;
 import id.sam.omdb2.service.APIClient;
 import id.sam.omdb2.service.APIInterfacesRest;
@@ -44,6 +49,8 @@ public class TambahData extends AppCompatActivity {
     Button btnSend;
     ProgressBar progressBarTambahData;
     String tanggal = "";
+    String image = "";
+    private AppDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,7 @@ public class TambahData extends AppCompatActivity {
         btnSend = findViewById(R.id.btnSend);
         progressBarTambahData = findViewById(R.id.progressBarTambahData);
         progressBarTambahData.setVisibility(View.GONE);
+        mDb = AppDatabase.getInstance(getApplicationContext());
         txtTitle.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -123,7 +131,7 @@ public class TambahData extends AppCompatActivity {
                     spnGenre.setAdapter(arrayGenre);
                     txtDirectedBy.setText(titleMovie.getDirector());
                     txtWritenBy.setText(titleMovie.getWriter());
-                    String image = titleMovie.getPoster();
+                    image = titleMovie.getPoster();
                     Picasso.get().load(image).into(imgPoster);
                     progressBarTambahData.setVisibility(View.GONE);
                 } else{
@@ -144,5 +152,122 @@ public class TambahData extends AppCompatActivity {
                 call.cancel();
             }
         });
+    }
+
+    public boolean checkMandatory(){
+        boolean pass = true;
+        if (TextUtils.isEmpty(txtTitle.getText().toString())){
+            pass = false;
+            txtTitle.setError("Masukkan Judul, mandatory");
+        }
+
+        return pass;
+    }
+
+    public void send(View view){
+        if (checkMandatory()){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Movie movie = null;
+                    movie = mDb.movieDAO().findByTitle(txtTitle.getText().toString());
+
+                    if (movie != null){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showErrorDialogDifferentContent();
+                            }
+                        });
+                    } else {
+                        mDb.movieDAO().insertAll(generateObjectData());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showDialogInfo();
+                            }
+                        });
+                    }
+                }
+            }).start();
+        } else {
+            showErrorDialog();
+        }
+    }
+
+    public void showErrorDialogDifferentContent(){
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(TambahData.this);
+        alertDialog.setTitle("Peringatan");
+        alertDialog.setMessage("Mohon masukkan Judul yang berbeda")
+                .setIcon(R.drawable.ic_close)
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                }).setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(TambahData.this, "Cancel ditekan", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog alert = alertDialog.create();
+        alert.show();
+    }
+
+    List<Movie>movieList = new ArrayList<>();
+    public Movie generateObjectData(){
+        Movie movie = new Movie();
+        movie.setId(movieList.size() + 1);
+        movie.setTitle(txtTitle.getText().toString());
+        movie.setRating(spnRating.getSelectedItem().toString());
+        movie.setGenre(spnGenre.getSelectedItem().toString());
+        movie.setDirectedBy(txtDirectedBy.getText().toString());
+        movie.setWrittenBy(txtWritenBy.getText().toString());
+        movie.setInTheater(tanggal);
+        movie.setStudio(txtStudio.getText().toString());
+        movie.setImgPoster(image);
+        return movie;
+    }
+
+    public void showDialogInfo(){
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(TambahData.this);
+        alertDialog.setTitle("Tambah Data");
+        alertDialog.setMessage("Berhasil tambah data")
+                .setIcon(R.drawable.ic_done_24)
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                });
+
+        AlertDialog alert = alertDialog.create();
+        alert.show();
+    }
+
+    public void showErrorDialog(){
+        final AlertDialog.Builder alertDialog = new AlertDialog.Builder(TambahData.this);
+        alertDialog.setTitle("Peringatan");
+        alertDialog.setMessage("Mohon isi field yang mandatory")
+                .setIcon(R.drawable.ic_close)
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                }).setNegativeButton("Batal", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(TambahData.this, "Cancel ditekan", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog alert = alertDialog.create();
+        alert.show();
     }
 }

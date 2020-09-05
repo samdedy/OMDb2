@@ -10,12 +10,27 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import id.sam.omdb2.model.Movie;
+
 public class MainActivity extends AppCompatActivity {
+
+    private AppDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDb = AppDatabase.getInstance(getApplicationContext());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Movie> movies = null;
+                movies = mDb.movieDAO().getAll();
+            }
+        }).start();
     }
 
     @Override

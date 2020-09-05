@@ -87,6 +87,10 @@ public class TambahData extends AppCompatActivity {
             }
         });
 
+        Date dNow = new Date( );
+        SimpleDateFormat ft = new SimpleDateFormat("dd-MMMM-yyyy");
+        tanggal = ft.format(dNow);
+
         calTheater.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
@@ -217,10 +221,8 @@ public class TambahData extends AppCompatActivity {
         alert.show();
     }
 
-    List<Movie>movieList = new ArrayList<>();
     public Movie generateObjectData(){
         Movie movie = new Movie();
-        movie.setId(movieList.size() + 1);
         movie.setTitle(txtTitle.getText().toString());
         movie.setRating(spnRating.getSelectedItem().toString());
         movie.setGenre(spnGenre.getSelectedItem().toString());

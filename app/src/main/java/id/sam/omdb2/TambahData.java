@@ -4,16 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ImageView;
@@ -88,13 +85,13 @@ public class TambahData extends AppCompatActivity {
         });
 
         Date dNow = new Date( );
-        SimpleDateFormat ft = new SimpleDateFormat("dd-MMMM-yyyy");
+        SimpleDateFormat ft = new SimpleDateFormat("dd-MM-yyyy");
         tanggal = ft.format(dNow);
 
         calTheater.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd-MMMM-yyyy");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                 Date date = new Date(year-1900, month, dayOfMonth);
                 tanggal = sdf.format(date);
                 Toast.makeText(TambahData.this, tanggal, Toast.LENGTH_SHORT).show();

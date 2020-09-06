@@ -202,7 +202,7 @@ public class TambahData extends AppCompatActivity {
     public void send(View view){
         if (checkMandatory()){
 
-            mDatabase.child("movie").child(String.valueOf(generateObjectData().getId())).setValue(generateObjectData());
+            mDatabase.child("movie").child(UUID.randomUUID().toString()).setValue(generateObjectData());
 
             new Thread(new Runnable() {
                 @Override

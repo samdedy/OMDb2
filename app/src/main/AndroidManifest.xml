@@ -3,7 +3,7 @@
     package="id.sam.omdb2">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,13 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".TambahData"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".testing.UploadImg">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".TambahData" />
+        <activity android:name=".MainActivity">
+
         </activity>
     </application>
 

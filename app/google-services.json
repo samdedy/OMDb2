@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "516711854151",
+    "firebase_url": "https://hellojuara.firebaseio.com",
+    "project_id": "hellojuara",
+    "storage_bucket": "hellojuara.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516711854151:android:89bc2176ee5b8af029c162",
+        "android_client_info": {
+          "package_name": "com.juara.hellojuara"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "516711854151-8aapnpdecpu5q6jja2nadj86cbrrhahq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.juara.hellojuara",
+            "certificate_hash": "2977493c7e2c8169864da3b7fa625c75b5dcbeac"
+          }
+        },
+        {
+          "client_id": "516711854151-cop20badd9j8l080gadri43hh73jfpn9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANJSWVWmU2PLw8LolfTejTbjkL3g001Yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "516711854151-cop20badd9j8l080gadri43hh73jfpn9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516711854151:android:2b444c0f264cc91929c162",
+        "android_client_info": {
+          "package_name": "id.sam.omdb2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "516711854151-cop20badd9j8l080gadri43hh73jfpn9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANJSWVWmU2PLw8LolfTejTbjkL3g001Yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "516711854151-cop20badd9j8l080gadri43hh73jfpn9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

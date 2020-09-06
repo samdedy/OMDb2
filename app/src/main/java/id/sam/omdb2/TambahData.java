@@ -1,11 +1,18 @@
 package id.sam.omdb2;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -19,20 +26,31 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import id.sam.omdb2.model.Movie;
 import id.sam.omdb2.model.TitleMovie;
 import id.sam.omdb2.service.APIClient;
 import id.sam.omdb2.service.APIInterfacesRest;
+import id.sam.omdb2.testing.UploadImg;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,11 +61,16 @@ public class TambahData extends AppCompatActivity {
     Spinner spnRating, spnGenre;
     CalendarView calTheater;
     ImageView imgPoster;
-    Button btnSend;
+    Button btnSend, btnChoose;
     ProgressBar progressBarTambahData;
     String tanggal = "";
     String image = "";
     private AppDatabase mDb;
+    private DatabaseReference mDatabase;
+    private Uri filePath;
+    FirebaseStorage storage;
+    StorageReference storageReference;
+    private final int PICK_IMAGE_REQUEST = 71;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,9 +86,22 @@ public class TambahData extends AppCompatActivity {
         txtStudio = findViewById(R.id.txtStudio);
         imgPoster = findViewById(R.id.imgPoster);
         btnSend = findViewById(R.id.btnSend);
+        btnChoose = findViewById(R.id.btnChoose);
+        btnChoose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("img/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+            }
+        });
         progressBarTambahData = findViewById(R.id.progressBarTambahData);
         progressBarTambahData.setVisibility(View.GONE);
         mDb = AppDatabase.getInstance(getApplicationContext());
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
         txtTitle.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -74,7 +110,6 @@ public class TambahData extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
                 callTitleMovie(charSequence.toString());
             }
 
@@ -97,7 +132,6 @@ public class TambahData extends AppCompatActivity {
                 Toast.makeText(TambahData.this, tanggal, Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     APIInterfacesRest apiInterface;
@@ -167,6 +201,9 @@ public class TambahData extends AppCompatActivity {
 
     public void send(View view){
         if (checkMandatory()){
+
+            mDatabase.child("movie").child(String.valueOf(generateObjectData().getId())).setValue(generateObjectData());
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -193,6 +230,57 @@ public class TambahData extends AppCompatActivity {
             }).start();
         } else {
             showErrorDialog();
+        }
+    }
+
+    private void uploadImage(){
+        btnSend.setEnabled(false);
+        final StorageReference ref = storageReference.child("img/"+ UUID.randomUUID().toString());
+        ref.putFile(filePath)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                image = uri.toString();
+                            }
+                        });
+                        Toast.makeText(TambahData.this, "Uploaded", Toast.LENGTH_SHORT).show();
+                        btnSend.setEnabled(true);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(TambahData.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        btnSend.setEnabled(true);
+                    }
+                })
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    }
+                });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null )
+        {
+            filePath = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                imgPoster.setImageBitmap(bitmap);
+                uploadImage();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
